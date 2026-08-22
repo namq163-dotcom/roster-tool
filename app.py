@@ -1,57 +1,110 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import pandas as pd
 import numpy as np
 from datetime import datetime
 from io import BytesIO, StringIO
 from openpyxl import load_workbook
+import base64
+import os
 
-# --- CÁC HÀM XỬ LÝ CHUNG ---
+# ==========================================
+# CẤU HÌNH GIAO DIỆN STREAMLIT (UI)
+# ==========================================
+st.set_page_config(page_title="Global APIS Automation", page_icon="✈️", layout="wide")
+
+# HÀM ĐỌC ẢNH LOGO TỪ GITHUB CHUYỂN THÀNH MÃ HIỂN THỊ
+def get_image_base64(file_path):
+    if os.path.exists(file_path):
+        with open(file_path, "rb") as image_file:
+            return base64.b64encode(image_file.read()).decode()
+    return None
+
+logo_b64 = get_image_base64("logo.png")
+
+if logo_b64:
+    logo_html = f'<img src="data:image/png;base64,{logo_b64}" alt="Crystal Bay Airlines" style="height: 70px; object-fit: contain;">'
+else:
+    logo_html = '<h1 style="margin: 0; color: #d4af37; font-size: 26px;">CRYSTAL BAY AIRLINES</h1>'
+
+# KHỐI HTML/JS GIAO DIỆN HEADER (LOGO + ĐỒNG HỒ)
+header_html = f"""
+<div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background-color: #081324; border-radius: 10px; border: 1px solid #1a2a40; font-family: Arial, sans-serif; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+    <!-- Bên trái: Logo Hãng -->
+    <div style="display: flex; align-items: center;">
+        {logo_html}
+        <div style="margin-left: 15px; border-left: 2px solid #d4af37; padding-left: 15px;">
+            <span style="color: #d4af37; font-size: 14px; font-weight: bold; letter-spacing: 2px;">GLOBAL APIS CENTER</span>
+        </div>
+    </div>
+    
+    <!-- Bên phải: Bảng Đồng Hồ Các Nước (Thời gian thực) -->
+    <div style="display: flex; gap: 20px; font-size: 13px; color: #333; background: #ffffff; padding: 10px 15px; border-radius: 8px; box-shadow: inset 0 0 5px rgba(0,0,0,0.1); border: 1px solid #e0e0e0;">
+        <div style="line-height: 1.6;">
+            <div><b style="color: #d32f2f;">🇻🇳 VN (Local):</b> <span id="time-vn" style="font-family: monospace; font-size: 14px; font-weight: bold;"></span></div>
+            <div><b style="color: #0056b3;">🌐 UTC:</b> <span id="time-utc" style="font-family: monospace; font-size: 14px; font-weight: bold;"></span></div>
+        </div>
+        <div style="border-left: 1px solid #ccc; padding-left: 15px; line-height: 1.6;">
+            <div><b>🇰🇿 KZ (Almaty):</b> <span id="time-kz" style="font-family: monospace; font-size: 14px;"></span></div>
+            <div><b>🇰🇬 KG (Bishkek):</b> <span id="time-kg" style="font-family: monospace; font-size: 14px;"></span></div>
+            <div><b>🇹🇯 TJ (Dushanbe):</b> <span id="time-tj" style="font-family: monospace; font-size: 14px;"></span></div>
+        </div>
+        <div style="border-left: 1px solid #ccc; padding-left: 15px; line-height: 1.6;">
+            <div><b>🇷🇺 RU (Moscow):</b> <span id="time-ru" style="font-family: monospace; font-size: 14px;"></span></div>
+            <div><b>🇵🇱 PL (Warsaw):</b> <span id="time-pl" style="font-family: monospace; font-size: 14px;"></span></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateTime() {{
+        const now = new Date();
+        document.getElementById('time-utc').innerText = now.toLocaleTimeString('en-GB', {{timeZone: 'UTC'}});
+        document.getElementById('time-vn').innerText = now.toLocaleTimeString('en-GB', {{timeZone: 'Asia/Ho_Chi_Minh'}});
+        document.getElementById('time-kz').innerText = now.toLocaleTimeString('en-GB', {{timeZone: 'Asia/Almaty'}});
+        document.getElementById('time-kg').innerText = now.toLocaleTimeString('en-GB', {{timeZone: 'Asia/Bishkek'}});
+        document.getElementById('time-tj').innerText = now.toLocaleTimeString('en-GB', {{timeZone: 'Asia/Dushanbe'}});
+        document.getElementById('time-ru').innerText = now.toLocaleTimeString('en-GB', {{timeZone: 'Europe/Moscow'}});
+        document.getElementById('time-pl').innerText = now.toLocaleTimeString('en-GB', {{timeZone: 'Europe/Warsaw'}});
+    }}
+    setInterval(updateTime, 1000);
+    updateTime();
+</script>
+"""
+components.html(header_html, height=120)
+
+# ==========================================
+# CÁC HÀM XỬ LÝ DỮ LIỆU
+# ==========================================
 def parse_date(date_str):
-    if pd.isna(date_str) or not str(date_str).strip() or str(date_str).strip().lower() == 'nan':
-        return ""
+    if pd.isna(date_str) or not str(date_str).strip() or str(date_str).strip().lower() == 'nan': return ""
     date_str = str(date_str).strip()
     try:
         d = datetime.strptime(date_str, "%d/%m/%y")
-        if d.year > 2050:
-            d = d.replace(year=d.year - 100)
+        if d.year > 2050: d = d.replace(year=d.year - 100)
         return d.strftime("%d/%m/%Y")
-    except:
-        return date_str
+    except: return date_str
 
-# --- LOGIC XỬ LÝ RIÊNG CHO VIỆT NAM (VNAPIS) ---
 def process_roster_data_vn(gd_file, template_file_path):
     content = gd_file.getvalue()
     df_gd = None
-    
-    try:
-        df_gd = pd.read_excel(BytesIO(content))
-    except Exception:
-        pass
+    try: df_gd = pd.read_excel(BytesIO(content))
+    except: pass
 
     if df_gd is None or len(df_gd) == 0:
         for enc in ['utf-8', 'latin1', 'cp1258', 'utf-16']:
             try:
-                html_content = content.decode(enc, errors='ignore')
-                dfs = pd.read_html(StringIO(html_content))
+                dfs = pd.read_html(StringIO(content.decode(enc, errors='ignore')))
                 if len(dfs) > 0: df_gd = dfs[0]; break
             except: continue
 
-    if df_gd is None or len(df_gd) == 0:
-        for sep in ['\t', ',', ';', '|']:
-            try:
-                df_gd = pd.read_csv(BytesIO(content), sep=sep, encoding='latin1', on_bad_lines='skip')
-                if df_gd is not None and len(df_gd.columns) > 1: break
-            except: continue
-
-    if df_gd is None or len(df_gd) == 0:
-        raise ValueError("Không thể đọc được dữ liệu trong file GD.")
+    if df_gd is None or len(df_gd) == 0: raise ValueError("Không thể đọc được dữ liệu trong file GD.")
 
     header_idx = None
     for idx, row in df_gd.iterrows():
         row_str = row.fillna("").astype(str).str.lower()
         if any('passport' in s for s in row_str) and any('name' in s for s in row_str):
-            header_idx = idx
-            break
+            header_idx = idx; break
             
     if header_idx is None: raise ValueError("Không tìm thấy bảng danh sách tổ bay trong file GD.")
         
@@ -76,10 +129,8 @@ def process_roster_data_vn(gd_file, template_file_path):
         if name_val.lower() != 'nan' and passport_val.lower() != 'nan' and name_val != '':
             if passport_val in seen_passports: continue
             seen_passports.add(passport_val)
-            
             name_parts = name_val.split()
-            if len(name_parts) > 1 and len(name_parts[-1]) <= 3 and name_parts[-1].isupper():
-                name_parts = name_parts[:-1]
+            if len(name_parts) > 1 and len(name_parts[-1]) <= 3 and name_parts[-1].isupper(): name_parts = name_parts[:-1]
                 
             family_name = name_parts[0] if name_parts else ""
             given_name = " ".join(name_parts[1:]) if len(name_parts) > 1 else ""
@@ -93,8 +144,6 @@ def process_roster_data_vn(gd_file, template_file_path):
                 'P', passport_val, nat, 
                 parse_date(row.iloc[col_expiry]) if col_expiry is not None else ""
             ])
-
-    if len(crew_data) == 0: raise ValueError("Không trích xuất được dữ liệu tổ bay nào từ file GD.")
 
     output = BytesIO()
     book = load_workbook(template_file_path)
@@ -111,75 +160,39 @@ def process_roster_data_vn(gd_file, template_file_path):
     df_preview = pd.DataFrame(crew_data, columns=['Họ', 'Tên đệm', 'Tên', 'Giới tính', 'Quốc tịch', 'Ngày sinh', 'Loại giấy tờ', 'Số giấy tờ', 'Nơi cấp', 'Ngày hết hạn'])
     return output.getvalue(), df_preview
 
-
 # ==========================================
-# CẤU HÌNH GIAO DIỆN STREAMLIT (UI)
+# PHẦN THÂN TRANG WEB (CHỨC NĂNG CHÍNH)
 # ==========================================
-st.set_page_config(page_title="Global APIS Automation", page_icon="✈️", layout="wide")
-st.title("✈️ Hệ thống APIS Đa Quốc Gia")
-st.markdown("Công cụ tự động trích xuất General Declaration (GD) sang Form APIS chuẩn của nhiều quốc gia.")
-
-# 1. Từ điển cấu hình các nước (Bản đồ các nước)
 COUNTRY_CONFIG = {
-    "🇻🇳 Việt Nam (VNAPIS)": {
-        "template": "Template_VNAPIS.xlsx",
-        "ready": True
-    },
-    "🇰🇿 Kazakhstan": {
-        "template": "Template_Kazakhstan.xlsx",
-        "ready": False
-    },
-    "🇰🇬 Kyrgyzstan": {
-        "template": "Template_Kyrgyzstan.xlsx",
-        "ready": False
-    },
-    "🇹🇯 Tajikistan": {
-        "template": "Template_Tajikistan.xlsx",
-        "ready": False
-    },
-    "🇷🇺 Russia (Nga)": {
-        "template": "Template_Russia.xlsx",
-        "ready": False
-    },
-    "🇵🇱 Poland (Ba Lan)": {
-        "template": "Template_Poland.xlsx",
-        "ready": False
-    }
+    "🇻🇳 Việt Nam (VNAPIS)": {"template": "Template_VNAPIS.xlsx", "ready": True},
+    "🇰🇿 Kazakhstan": {"template": "Template_Kazakhstan.xlsx", "ready": False},
+    "🇰🇬 Kyrgyzstan": {"template": "Template_Kyrgyzstan.xlsx", "ready": False},
+    "🇹🇯 Tajikistan": {"template": "Template_Tajikistan.xlsx", "ready": False},
+    "🇷🇺 Russia (Nga)": {"template": "Template_Russia.xlsx", "ready": False},
+    "🇵🇱 Poland (Ba Lan)": {"template": "Template_Poland.xlsx", "ready": False}
 }
 
-# 2. Khung lựa chọn quốc gia
-st.markdown("---")
-selected_country = st.selectbox(
-    "🌍 Vui lòng chọn Quốc gia đến để xuất APIS:",
-    list(COUNTRY_CONFIG.keys())
-)
-
+selected_country = st.selectbox("🌍 Vui lòng chọn Quốc gia đến để xuất APIS:", list(COUNTRY_CONFIG.keys()))
 config = COUNTRY_CONFIG[selected_country]
 
-# 3. Phân luồng xử lý
 if config["ready"]:
     uploaded_gd = st.file_uploader(f"Tải lên file GD (.xls, .xlsx) cho {selected_country.split(' ')[1]}", type=["xls", "xlsx", "txt", "csv"])
-    
     if uploaded_gd is not None:
         st.info(f"Đang xử lý dữ liệu cho {selected_country}...")
         try:
-            # Hiện tại gán VN vào hàm xử lý, các nước khác sẽ có hàm riêng sau
             if "Việt Nam" in selected_country:
                 excel_data, preview_data = process_roster_data_vn(uploaded_gd, config["template"])
                 
             st.success(f"✅ Đã xử lý thành công form APIS cho {selected_country}!")
             st.dataframe(preview_data) 
-            
-            # Tên file tải về tự động đổi theo tên quốc gia
-            download_name = f"APIS_Crew_{selected_country.split(' ')[1]}.xlsx"
             st.download_button(
                 label=f"⬇️ Tải form Excel hoàn chỉnh",
                 data=excel_data,
-                file_name=download_name,
+                file_name=f"APIS_Crew_{selected_country.split(' ')[1]}.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
         except Exception as e:
             st.error(f"❌ Có lỗi xảy ra: {e}")
 else:
     st.warning(f"🚧 Chức năng xuất APIS cho **{selected_country.split(' ', 1)[1]}** đang được xây dựng.")
-    st.info("💡 **Hướng dẫn cho Admin:**\n1. Chuẩn bị file Excel mẫu của quốc gia này.\n2. Tải file mẫu lên hệ thống.\n3. Cung cấp quy tắc điền (Cột nào điền Tên, Dòng nào bắt đầu...) để lập trình viên hoàn thiện logic.")
+    st.info("💡 **Hướng dẫn cho Admin:**\n1. Chuẩn bị file Excel mẫu của quốc gia này.\n2. Tải file mẫu lên hệ thống.\n3. Cung cấp quy tắc điền để lập trình viên hoàn thiện logic.")
