@@ -234,4 +234,4 @@ if config["ready"]:
             st.error(f"❌ Có lỗi xảy ra: {e}")
 else:
     st.warning(f"🚧 Chức năng xuất APIS cho **{config['name']}** đang được xây dựng.")
-    st.info("💡 **Hướng dẫn cho Admin:**\n1. Chuẩn bị file Excel mẫu của quốc gia này.\n2. Tải file mẫu lên hệ thống.\n3. Cung cấp quy tắc điền để lập trình viên hoàn thiện logic.")
+    st.info("💡 **Hướng dẫn cho Admin:**\n1. Chuẩn bị file Template mẫu của quốc gia này.\n2. Tải file Template mẫu lên hệ thống.\n3. Cung cấp quy tắc điền để lập trình viên hoàn thiện logic.")
