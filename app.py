@@ -35,7 +35,7 @@ header_html = """
         </div>
         <div style="line-height: 1.3;">
             <div style="color: #00264d; font-size: 21px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase;">CRYSTAL BAY AIRLINES</div>
-            <div style="color: #0056b3; font-size: 11px; font-weight: 700; letter-spacing: 2.5px; margin-top: 2px;">APIS OPERATIONS CENTER</div>
+            <div style="color: #0056b3; font-size: 11px; font-weight: 700; letter-spacing: 2.5px; margin-top: 2px;">APIS CENTER</div>
         </div>
     </div>
     
