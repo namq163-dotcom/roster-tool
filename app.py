@@ -5,62 +5,60 @@ import numpy as np
 from datetime import datetime
 from io import BytesIO, StringIO
 from openpyxl import load_workbook
-import os
 
 # ==========================================
 # CẤU HÌNH GIAO DIỆN STREAMLIT (UI)
 # ==========================================
 st.set_page_config(page_title="Global APIS Automation", page_icon="✈️", layout="wide")
 
-# KHUNG HEADER: Dùng cột của Streamlit để hiện logo chuẩn xác tuyệt đối, phần phải là đồng hồ thời gian thực
-col_logo, col_clock = st.col([1.2, 2.8]) if hasattr(st, 'col') else st.columns([1.2, 2.8])
-
-with col_logo:
-    if os.path.exists("logo.jpg"):
-        st.image("logo.jpg", width=280)
-    elif os.path.exists("logo.png"):
-        st.image("logo.png", width=280)
-    else:
-        st.markdown("<h2 style='color: #0056b3; margin: 0;'>CRYSTAL BAY AIRLINES</h2>", unsafe_allow_html=True)
-
-with col_clock:
-    clock_html = """
-    <div style="display: flex; justify-content: flex-end; align-items: center; background-color: #f8f9fa; padding: 10px 15px; border-radius: 8px; border: 1px solid #dee2e6; font-family: Arial, sans-serif; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-        <div style="display: flex; gap: 15px; font-size: 12px; color: #333;">
-            <div style="line-height: 1.5;">
-                <div><b style="color: #d32f2f;">🇻🇳 VN (Local):</b> <span id="time-vn" style="font-family: monospace; font-size: 13px; font-weight: bold;"></span></div>
-                <div><b style="color: #0056b3;">🌐 UTC:</b> <span id="time-utc" style="font-family: monospace; font-size: 13px; font-weight: bold;"></span></div>
-            </div>
-            <div style="border-left: 1px solid #ccc; padding-left: 12px; line-height: 1.5;">
-                <div><b>🇰🇿 KZ:</b> <span id="time-kz" style="font-family: monospace; font-size: 13px;"></span></div>
-                <div><b>🇰🇬 KG:</b> <span id="time-kg" style="font-family: monospace; font-size: 13px;"></span></div>
-                <div><b>🇹🇯 TJ:</b> <span id="time-tj" style="font-family: monospace; font-size: 13px;"></span></div>
-            </div>
-            <div style="border-left: 1px solid #ccc; padding-left: 12px; line-height: 1.5;">
-                <div><b>🇷🇺 RU:</b> <span id="time-ru" style="font-family: monospace; font-size: 13px;"></span></div>
-                <div><b>🇵🇱 PL:</b> <span id="time-pl" style="font-family: monospace; font-size: 13px;"></span></div>
-            </div>
+# KHUNG HEADER: TẠO GIAO DIỆN LOGO & ĐỒNG HỒ THỜI GIAN THỰC BẰNG HTML/CSS
+header_html = """
+<div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; background-color: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6; font-family: Arial, sans-serif; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+    <!-- Bên trái: Logo thiết kế chuẩn hãng -->
+    <div style="display: flex; align-items: center;">
+        <div style="background: linear-gradient(135deg, #0056b3, #003366); padding: 8px 12px; border-radius: 6px; margin-right: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <span style="font-size: 20px;">✈️</span>
+        </div>
+        <div style="line-height: 1.2;">
+            <div style="color: #003366; font-size: 20px; font-weight: 900; letter-spacing: 0.5px; text-transform: uppercase;">CRYSTAL BAY AIRLINES</div>
+            <div style="color: #666; font-size: 11px; font-weight: bold; letter-spacing: 2px; margin-top: 3px;">APIS CENTER</div>
         </div>
     </div>
     
-    <script>
-        function updateTime() {
-            const now = new Date();
-            document.getElementById('time-utc').innerText = now.toLocaleTimeString('en-GB', {timeZone: 'UTC'});
-            document.getElementById('time-vn').innerText = now.toLocaleTimeString('en-GB', {timeZone: 'Asia/Ho_Chi_Minh'});
-            document.getElementById('time-kz').innerText = now.toLocaleTimeString('en-GB', {timeZone: 'Asia/Almaty'});
-            document.getElementById('time-kg').innerText = now.toLocaleTimeString('en-GB', {timeZone: 'Asia/Bishkek'});
-            document.getElementById('time-tj').innerText = now.toLocaleTimeString('en-GB', {timeZone: 'Asia/Dushanbe'});
-            document.getElementById('time-ru').innerText = now.toLocaleTimeString('en-GB', {timeZone: 'Europe/Moscow'});
-            document.getElementById('time-pl').innerText = now.toLocaleTimeString('en-GB', {timeZone: 'Europe/Warsaw'});
-        }
-        setInterval(updateTime, 1000);
-        updateTime();
-    </script>
-    """
-    components.html(clock_html, height=65)
+    <!-- Bên phải: Bảng Đồng Hồ Các Nước (Thời gian thực) -->
+    <div style="display: flex; gap: 15px; font-size: 12px; color: #333; background: #ffffff; padding: 8px 15px; border-radius: 6px; border: 1px solid #e0e0e0;">
+        <div style="line-height: 1.4;">
+            <div><b style="color: #d32f2f;">🇻🇳 VN (Local):</b> <span id="time-vn" style="font-family: monospace; font-size: 12px; font-weight: bold;"></span></div>
+            <div><b style="color: #0056b3;">🌐 UTC:</b> <span id="time-utc" style="font-family: monospace; font-size: 12px; font-weight: bold;"></span></div>
+        </div>
+        <div style="border-left: 1px solid #ccc; padding-left: 12px; line-height: 1.4;">
+            <div><b>🇰🇿 KZ:</b> <span id="time-kz" style="font-family: monospace; font-size: 12px;"></span></div>
+            <div><b>🇰🇬 KG:</b> <span id="time-kg" style="font-family: monospace; font-size: 12px;"></span></div>
+            <div><b>🇹🇯 TJ:</b> <span id="time-tj" style="font-family: monospace; font-size: 12px;"></span></div>
+        </div>
+        <div style="border-left: 1px solid #ccc; padding-left: 12px; line-height: 1.4;">
+            <div><b>🇷🇺 RU:</b> <span id="time-ru" style="font-family: monospace; font-size: 12px;"></span></div>
+            <div><b>🇵🇱 PL:</b> <span id="time-pl" style="font-family: monospace; font-size: 12px;"></span></div>
+        </div>
+    </div>
+</div>
 
-st.markdown("---")
+<script>
+    function updateTime() {
+        const now = new Date();
+        document.getElementById('time-utc').innerText = now.toLocaleTimeString('en-GB', {timeZone: 'UTC'});
+        document.getElementById('time-vn').innerText = now.toLocaleTimeString('en-GB', {timeZone: 'Asia/Ho_Chi_Minh'});
+        document.getElementById('time-kz').innerText = now.toLocaleTimeString('en-GB', {timeZone: 'Asia/Almaty'});
+        document.getElementById('time-kg').innerText = now.toLocaleTimeString('en-GB', {timeZone: 'Asia/Bishkek'});
+        document.getElementById('time-tj').innerText = now.toLocaleTimeString('en-GB', {timeZone: 'Asia/Dushanbe'});
+        document.getElementById('time-ru').innerText = now.toLocaleTimeString('en-GB', {timeZone: 'Europe/Moscow'});
+        document.getElementById('time-pl').innerText = now.toLocaleTimeString('en-GB', {timeZone: 'Europe/Warsaw'});
+    }
+    setInterval(updateTime, 1000);
+    updateTime();
+</script>
+"""
+components.html(header_html, height=75)
 
 # ==========================================
 # CÁC HÀM XỬ LÝ DỮ LIỆU
