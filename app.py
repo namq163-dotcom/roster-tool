@@ -39,12 +39,12 @@ header_html = """
         <div style="font-size: 14px; letter-spacing: 4px; opacity: 0.8;">APIS CENTER</div>
     </div>
     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; font-size: 13px; text-align: center;">
-        <div style="background: rgba(255,255,255,0.08); padding: 8px; border-radius: 8px;"><b>🇻🇳 VietNam (VN):</b><br><span id="time-vn" style="font-size: 16px; font-weight: bold; color: #d4af37;"></span></div>
+        <div style="background: rgba(255,255,255,0.08); padding: 8px; border-radius: 8px;"><b> VietNam (VN):</b><br><span id="time-vn" style="font-size: 16px; font-weight: bold; color: #d4af37;"></span></div>
         <div style="background: rgba(255,255,255,0.08); padding: 8px; border-radius: 8px;"><b>🌐 UTC:</b><br><span id="time-utc" style="font-size: 16px; font-weight: bold; color: #d4af37;"></span></div>
-        <div style="background: rgba(255,255,255,0.08); padding: 8px; border-radius: 8px;"><b>🇰🇿 Kazakhstan (KZ):</b><br><span id="time-kz" style="font-size: 16px; font-weight: bold; color: #d4af37;"></span></div>
-        <div style="background: rgba(255,255,255,0.08); padding: 8px; border-radius: 8px;"><b>🇰🇬 Kyrgyzstan (KG):</b><br><span id="time-kg" style="font-size: 16px; font-weight: bold; color: #d4af37;"></span></div>
-        <div style="background: rgba(255,255,255,0.08); padding: 8px; border-radius: 8px;"><b>🇹🇯 Tajikistan (TJ):</b><br><span id="time-tj" style="font-size: 16px; font-weight: bold; color: #d4af37;"></span></div>
-        <div style="background: rgba(255,255,255,0.08); padding: 8px; border-radius: 8px;"><b>🇷🇺 Russia (RU):</b><br><span id="time-ru" style="font-size: 16px; font-weight: bold; color: #d4af37;"></span></div>
+        <div style="background: rgba(255,255,255,0.08); padding: 8px; border-radius: 8px;"><b> Kazakhstan (KZ):</b><br><span id="time-kz" style="font-size: 16px; font-weight: bold; color: #d4af37;"></span></div>
+        <div style="background: rgba(255,255,255,0.08); padding: 8px; border-radius: 8px;"><b> Kyrgyzstan (KG):</b><br><span id="time-kg" style="font-size: 16px; font-weight: bold; color: #d4af37;"></span></div>
+        <div style="background: rgba(255,255,255,0.08); padding: 8px; border-radius: 8px;"><b> Tajikistan (TJ):</b><br><span id="time-tj" style="font-size: 16px; font-weight: bold; color: #d4af37;"></span></div>
+        <div style="background: rgba(255,255,255,0.08); padding: 8px; border-radius: 8px;"><b> Russia (RU):</b><br><span id="time-ru" style="font-size: 16px; font-weight: bold; color: #d4af37;"></span></div>
     </div>
 </div>
 <script>
