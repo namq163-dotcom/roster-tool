@@ -43,7 +43,8 @@ header_html = """
         <div style="background: rgba(255,255,255,0.08); padding: 8px; border-radius: 8px;"><b>🌐 UTC:</b><br><span id="time-utc" style="font-size: 16px; font-weight: bold; color: #d4af37;"></span></div>
         <div style="background: rgba(255,255,255,0.08); padding: 8px; border-radius: 8px;"><b> Kazakhstan (ALA-NQZ):</b><br><span id="time-kz" style="font-size: 16px; font-weight: bold; color: #d4af37;"></span></div>
         <div style="background: rgba(255,255,255,0.08); padding: 8px; border-radius: 8px;"><b> Kyrgyzstan (FRU):</b><br><span id="time-kg" style="font-size: 16px; font-weight: bold; color: #d4af37;"></span></div>
-        <div style="background: rgba(255,255,255,0.08); padding: 8px; border-radius: 8px;"><b> Tajikistan (SYU):</b><br><span id="time-tj" style="font-size: 16px; font-weight: bold; color: #d4af37;"></span></div>
+        <div style="background: rgba(255,255,255,0.08); padding: 8px; border-radius: 8px;"><b> Tajikistan (DYU):</b><br><span id="time-tj" style="font-size: 16px; font-weight: bold; color: #d4af37;"></span></div>
+        <div style="background: rgba(255,255,255,0.08); padding: 8px; border-radius: 8px;"><b> Poland (WAW):</b><br><span id="time-pl" style="font-size: 16px; font-weight: bold; color: #d4af37;"></span></div>
         <div style="background: rgba(255,255,255,0.08); padding: 8px; border-radius: 8px;"><b> Russia (LED-OVB-KJA-IKT):</b><br><span id="time-ru" style="font-size: 16px; font-weight: bold; color: #d4af37;"></span></div>
     </div>
 </div>
@@ -51,8 +52,8 @@ header_html = """
     function updateTime() {
         const now = new Date();
         const opts = {hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false};
-        const zones = ['Asia/Ho_Chi_Minh', 'UTC', 'Asia/Almaty', 'Asia/Bishkek', 'Asia/Dushanbe', 'Europe/Moscow'];
-        const ids = ['vn', 'utc', 'kz', 'kg', 'tj', 'ru'];
+        const zones = ['Asia/Ho_Chi_Minh', 'UTC', 'Asia/Almaty', 'Asia/Bishkek', 'Asia/Dushanbe', 'Europe/Moscow', 'Europe/Poland'];
+        const ids = ['vn', 'utc', 'kz', 'kg', 'tj', 'ru', 'pl'];
         ids.forEach((id, i) => {
             document.getElementById('time-'+id).innerText = now.toLocaleTimeString('en-GB', {timeZone: zones[i], ...opts});
         });
