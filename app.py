@@ -20,13 +20,13 @@ def process_roster_data(gd_file, template_file_path):
     content = gd_file.getvalue()
     df_gd = None
     
-    # 1. Thử đọc như file Excel chuẩn (.xlsx hoặc .xls hỗ trợ bởi openpyxl/xlrd)
+    # 1. Thử đọc như file Excel
     try:
         df_gd = pd.read_excel(BytesIO(content))
     except Exception:
         pass
 
-    # 2. Nếu là file HTML giả lập .xls (xuất từ các hệ thống hãng bay)
+    # 2. Thử đọc như file HTML
     if df_gd is None or len(df_gd) == 0:
         for enc in ['utf-8', 'latin1', 'cp1258', 'utf-16']:
             try:
@@ -38,7 +38,7 @@ def process_roster_data(gd_file, template_file_path):
             except:
                 continue
 
-    # 3. Nếu là file văn bản phân cách (CSV/Tab)
+    # 3. Thử đọc như file văn bản/CSV
     if df_gd is None or len(df_gd) == 0:
         for sep in ['\t', ',', ';', '|']:
             try:
@@ -49,12 +49,13 @@ def process_roster_data(gd_file, template_file_path):
                 continue
 
     if df_gd is None or len(df_gd) == 0:
-        raise ValueError("Không thể đọc được dữ liệu trong file GD. Bạn hãy thử mở file bằng Excel rồi Save As sang định dạng .xlsx nhé!")
+        raise ValueError("Không thể đọc được dữ liệu trong file GD.")
 
-    # Tìm dòng tiêu đề chứa 'passport' và 'name'
+    # Tìm dòng tiêu đề chứa 'passport' và 'name' (xử lý an toàn với dữ liệu trống)
     header_idx = None
     for idx, row in df_gd.iterrows():
-        row_str = row.astype(str).str.lower()
+        # Chuyển toàn bộ hàng thành chuỗi, bỏ qua giá trị NaN/float
+        row_str = row.fillna("").astype(str).str.lower()
         if any('passport' in s for s in row_str) and any('name' in s for s in row_str):
             header_idx = idx
             break
@@ -62,7 +63,7 @@ def process_roster_data(gd_file, template_file_path):
     if header_idx is None:
         raise ValueError("Không tìm thấy bảng danh sách tổ bay trong file GD (không thấy cột Name/Passport).")
         
-    header_row = df_gd.iloc[header_idx].astype(str).str.lower()
+    header_row = df_gd.iloc[header_idx].fillna("").astype(str).str.lower()
     col_name = col_passport = col_dob = col_gender = col_nat = col_expiry = None
     
     for idx, val in enumerate(header_row):
@@ -77,13 +78,14 @@ def process_roster_data(gd_file, template_file_path):
     for idx in range(header_idx + 1, len(df_gd)):
         row = df_gd.iloc[idx]
         
-        if row.astype(str).str.contains('DECLARATION OF HEALTH', case=False, na=False).any():
+        row_full_str = row.fillna("").astype(str).str.cat(sep=" ").lower()
+        if 'declaration of health' in row_full_str:
             break
             
-        name_val = str(row.iloc[col_name]).strip() if pd.notna(row.iloc[col_name]) else 'nan'
-        passport_val = str(row.iloc[col_passport]).strip() if pd.notna(row.iloc[col_passport]) else 'nan'
+        name_val = str(row.iloc[col_name]).strip() if col_name is not None and pd.notna(row.iloc[col_name]) else 'nan'
+        passport_val = str(row.iloc[col_passport]).strip() if col_passport is not None and pd.notna(row.iloc[col_passport]) else 'nan'
         
-        if name_val.lower() != 'nan' and passport_val.lower() != 'nan':
+        if name_val.lower() != 'nan' and passport_val.lower() != 'nan' and name_val != '':
             name_parts = name_val.split()
             if len(name_parts) > 1 and len(name_parts[-1]) <= 3 and name_parts[-1].isupper():
                 name_parts = name_parts[:-1]
@@ -91,24 +93,31 @@ def process_roster_data(gd_file, template_file_path):
             family_name = name_parts[0] if name_parts else ""
             given_name = " ".join(name_parts[1:]) if len(name_parts) > 1 else ""
             
-            nat = str(row.iloc[col_nat]).strip() if pd.notna(row.iloc[col_nat]) else ""
-            if nat == 'VNM': nat = 'VN'
+            nat = str(row.iloc[col_nat]).strip() if col_nat is not None and pd.notna(row.iloc[col_nat]) else ""
+            if nat.upper() == 'VNM': nat = 'VN'
+            
+            gender = str(row.iloc[col_gender]).strip() if col_gender is not None and pd.notna(row.iloc[col_gender]) else ""
+            dob = parse_date(row.iloc[col_dob]) if col_dob is not None else ""
+            expiry = parse_date(row.iloc[col_expiry]) if col_expiry is not None else ""
             
             crew_data.append({
                 'Họ': family_name,
                 'Tên đệm': np.nan, 
                 'Tên': given_name,
-                'Giới tính': str(row.iloc[col_gender]).strip(),
+                'Giới tính': gender,
                 'Quốc tịch': nat,
-                'Ngày sinh': parse_date(row.iloc[col_dob]),
+                'Ngày sinh': dob,
                 'Loại giấy tờ': 'P', 
                 'Số giấy tờ': passport_val,
                 'Nơi cấp': nat, 
-                'Ngày hết hạn': parse_date(row.iloc[col_expiry])
+                'Ngày hết hạn': expiry
             })
             
     df_crew = pd.DataFrame(crew_data)
     
+    if len(df_crew) == 0:
+        raise ValueError("Đã tìm thấy bảng nhưng không trích xuất được dữ liệu tổ bay nào.")
+
     df_template = pd.read_excel(template_file_path, sheet_name=0, header=None)
     header_template = df_template.iloc[:12].copy()
     
