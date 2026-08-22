@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 from datetime import datetime
-from io import BytesIO
+from io import BytesIO, StringIO
 
 def parse_date(date_str):
     if pd.isna(date_str) or not str(date_str).strip() or str(date_str).strip().lower() == 'nan':
@@ -17,10 +17,23 @@ def parse_date(date_str):
         return date_str
 
 def process_roster_data(gd_file, template_file_path):
+    # Đọc file GD linh hoạt (hỗ trợ cả Excel và file HTML định dạng .xls)
+    df_gd = None
     try:
         df_gd = pd.read_excel(gd_file)
-    except:
-        df_gd = pd.read_html(gd_file)[0]
+    except Exception:
+        try:
+            content = gd_file.getvalue()
+            # Thử giải mã bằng utf-8 hoặc latin1 nếu file HTML tiếng Việt
+            try:
+                html_content = content.decode('utf-8')
+            except:
+                html_content = content.decode('latin1', errors='ignore')
+            
+            dfs = pd.read_html(StringIO(html_content))
+            df_gd = dfs[0]
+        except Exception as e:
+            raise ValueError(f"Không thể đọc file GD. Chi tiết: {e}")
     
     header_idx = None
     for idx, row in df_gd.iterrows():
