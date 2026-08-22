@@ -41,17 +41,17 @@ header_html = """
     
     <div style="display: flex; gap: 12px; font-size: 11.5px; color: #2c3e50; background: #ffffff; padding: 8px 14px; border-radius: 8px; border: 1px solid #dcdfe6; box-shadow: inset 0 1px 3px rgba(0,0,0,0.03);">
         <div style="line-height: 1.6;">
-            <div><b style="color: #c0392b;">🇻🇳 VN (Local):</b> <span id="time-vn" style="font-family: 'Consolas', monospace; font-size: 12px; font-weight: 700;"></span></div>
+            <div><b style="color: #c0392b;"> VN (Local):</b> <span id="time-vn" style="font-family: 'Consolas', monospace; font-size: 12px; font-weight: 700;"></span></div>
             <div><b style="color: #2980b9;">🌐 UTC:</b> <span id="time-utc" style="font-family: 'Consolas', monospace; font-size: 12px; font-weight: 700;"></span></div>
         </div>
         <div style="border-left: 1px solid #dcdfe6; padding-left: 10px; line-height: 1.6;">
-            <div><b>🇰🇿 KZ - Kazakhstan:</b> <span id="time-kz" style="font-family: 'Consolas', monospace; font-size: 11.5px;"></span></div>
-            <div><b>🇰🇬 KG - Kyrgyzstan:</b> <span id="time-kg" style="font-family: 'Consolas', monospace; font-size: 11.5px;"></span></div>
-            <div><b>🇹🇯 TJ - Tajikistan:</b> <span id="time-tj" style="font-family: 'Consolas', monospace; font-size: 11.5px;"></span></div>
+            <div><b> KZ - Kazakhstan:</b> <span id="time-kz" style="font-family: 'Consolas', monospace; font-size: 11.5px;"></span></div>
+            <div><b> KG - Kyrgyzstan:</b> <span id="time-kg" style="font-family: 'Consolas', monospace; font-size: 11.5px;"></span></div>
+            <div><b> TJ - Tajikistan:</b> <span id="time-tj" style="font-family: 'Consolas', monospace; font-size: 11.5px;"></span></div>
         </div>
         <div style="border-left: 1px solid #dcdfe6; padding-left: 10px; line-height: 1.6;">
-            <div><b>🇷🇺 RU - Russia:</b> <span id="time-ru" style="font-family: 'Consolas', monospace; font-size: 11.5px;"></span></div>
-            <div><b>🇵🇱 PL - Poland:</b> <span id="time-pl" style="font-family: 'Consolas', monospace; font-size: 11.5px;"></span></div>
+            <div><b> RU - Russia:</b> <span id="time-ru" style="font-family: 'Consolas', monospace; font-size: 11.5px;"></span></div>
+            <div><b> PL - Poland:</b> <span id="time-pl" style="font-family: 'Consolas', monospace; font-size: 11.5px;"></span></div>
         </div>
     </div>
 </div>
