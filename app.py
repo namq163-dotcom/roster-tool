@@ -70,6 +70,8 @@ def process_roster_data(gd_file, template_file_path):
     col_expiry = next((i for i, v in enumerate(header_row) if 'expiry' in v), None)
 
     crew_data = []
+    seen_passports = set() # Tránh trùng lặp (double) dữ liệu
+    
     for idx in range(header_idx + 1, len(df_gd)):
         row = df_gd.iloc[idx]
         if 'declaration of health' in row.fillna("").astype(str).str.cat(sep=" ").lower():
@@ -79,6 +81,10 @@ def process_roster_data(gd_file, template_file_path):
         passport_val = str(row.iloc[col_passport]).strip() if col_passport is not None and pd.notna(row.iloc[col_passport]) else 'nan'
         
         if name_val.lower() != 'nan' and passport_val.lower() != 'nan' and name_val != '':
+            if passport_val in seen_passports:
+                continue # Bỏ qua nếu bị trùng số passport
+            seen_passports.add(passport_val)
+            
             name_parts = name_val.split()
             if len(name_parts) > 1 and len(name_parts[-1]) <= 3 and name_parts[-1].isupper():
                 name_parts = name_parts[:-1]
@@ -109,20 +115,24 @@ def process_roster_data(gd_file, template_file_path):
     if len(crew_data) == 0:
         raise ValueError("Không trích xuất được dữ liệu tổ bay nào từ file GD.")
 
-    # 3. Ghi trực tiếp vào file Template giữ nguyên 100% định dạng gốc
+    # 3. Ghi vào file Template (Giữ nguyên dòng 1-13 làm tiêu đề chuẩn, bắt đầu ghi từ dòng 14)
     output = BytesIO()
     book = load_workbook(template_file_path)
     sheet = book.active
     
-    # Bắt đầu điền dữ liệu từ dòng 13 (Cột A đến J tương ứng cột 1 đến 10)
-    start_row = 13 
+    # Xóa sạch các dòng cũ từ dòng 14 trở xuống (tránh bị dính dữ liệu mẫu cũ bị double)
+    for row in sheet.iter_rows(min_row=14, max_row=sheet.max_row, min_col=1, max_col=10):
+        for cell in row:
+            cell.value = None
+
+    # Điền dữ liệu mới bắt đầu từ dòng 14 chuẩn xác
+    start_row = 14 
     for r_idx, row_data in enumerate(crew_data, start_row):
         for c_idx, value in enumerate(row_data, 1):
             sheet.cell(row=r_idx, column=c_idx, value=value)
             
     book.save(output)
     
-    # Trả về dữ liệu kèm bảng preview
     df_preview = pd.DataFrame(crew_data, columns=['Họ', 'Tên đệm', 'Tên', 'Giới tính', 'Quốc tịch', 'Ngày sinh', 'Loại giấy tờ', 'Số giấy tờ', 'Nơi cấp', 'Ngày hết hạn'])
     return output.getvalue(), df_preview
 
