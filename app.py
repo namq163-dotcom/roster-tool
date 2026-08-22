@@ -13,7 +13,7 @@ st.set_page_config(page_title="Global APIS Automation", page_icon="✈️", layo
 
 # KHUNG HEADER: TẠO GIAO DIỆN CHUẨN OCC HÀNG KHÔNG
 header_html = """
-<div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; background-color: #f4f6f9; border-radius: 8px; border: 1px solid #dcdfe6; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+<div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; background-color: #f4f6f9; border-radius: 8px; border: 1px solid #dcdfe6; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
     <!-- Bên trái: Logo nhận diện hãng -->
     <div style="display: flex; align-items: center;">
         <div style="background: linear-gradient(135deg, #004080, #002040); padding: 10px 14px; border-radius: 6px; margin-right: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.15);">
@@ -26,19 +26,19 @@ header_html = """
     </div>
     
     <!-- Bên phải: Bảng Đồng Hồ Thời Gian Thực (Chuẩn OCC) -->
-    <div style="display: flex; gap: 15px; font-size: 12px; color: #2c3e50; background: #ffffff; padding: 10px 18px; border-radius: 6px; border: 1px solid #dcdfe6; box-shadow: inset 0 1px 3px rgba(0,0,0,0.03);">
-        <div style="line-height: 1.5;">
-            <div><b style="color: #c0392b;">🇻🇳 VN (Local):</b> <span id="time-vn" style="font-family: 'Consolas', monospace; font-size: 13px; font-weight: 700;"></span></div>
-            <div><b style="color: #2980b9;">🌐 UTC:</b> <span id="time-utc" style="font-family: 'Consolas', monospace; font-size: 13px; font-weight: 700;"></span></div>
+    <div style="display: flex; gap: 12px; font-size: 11.5px; color: #2c3e50; background: #ffffff; padding: 8px 14px; border-radius: 6px; border: 1px solid #dcdfe6; box-shadow: inset 0 1px 3px rgba(0,0,0,0.03);">
+        <div style="line-height: 1.6;">
+            <div><b style="color: #c0392b;">🇻🇳 VN (Local):</b> <span id="time-vn" style="font-family: 'Consolas', monospace; font-size: 12px; font-weight: 700;"></span></div>
+            <div><b style="color: #2980b9;">🌐 UTC:</b> <span id="time-utc" style="font-family: 'Consolas', monospace; font-size: 12px; font-weight: 700;"></span></div>
         </div>
-        <div style="border-left: 1px solid #dcdfe6; padding-left: 14px; line-height: 1.5;">
-            <div><b>🇰🇿 KZ - Kazakhstan:</b> <span id="time-kz" style="font-family: 'Consolas', monospace; font-size: 12px;"></span></div>
-            <div><b>🇰🇬 KG - Kyrgyzstan:</b> <span id="time-kg" style="font-family: 'Consolas', monospace; font-size: 12px;"></span></div>
-            <div><b>🇹🇯 TJ - Tajikistan:</b> <span id="time-tj" style="font-family: 'Consolas', monospace; font-size: 12px;"></span></div>
+        <div style="border-left: 1px solid #dcdfe6; padding-left: 10px; line-height: 1.6;">
+            <div><b>🇰🇿 KZ - Kazakhstan:</b> <span id="time-kz" style="font-family: 'Consolas', monospace; font-size: 11.5px;"></span></div>
+            <div><b>🇰🇬 KG - Kyrgyzstan:</b> <span id="time-kg" style="font-family: 'Consolas', monospace; font-size: 11.5px;"></span></div>
+            <div><b>🇹🇯 TJ - Tajikistan:</b> <span id="time-tj" style="font-family: 'Consolas', monospace; font-size: 11.5px;"></span></div>
         </div>
-        <div style="border-left: 1px solid #dcdfe6; padding-left: 14px; line-height: 1.5;">
-            <div><b>🇷🇺 RU - Russia:</b> <span id="time-ru" style="font-family: 'Consolas', monospace; font-size: 12px;"></span></div>
-            <div><b>🇵🇱 PL - Poland:</b> <span id="time-pl" style="font-family: 'Consolas', monospace; font-size: 12px;"></span></div>
+        <div style="border-left: 1px solid #dcdfe6; padding-left: 10px; line-height: 1.6;">
+            <div><b>🇷🇺 RU - Russia:</b> <span id="time-ru" style="font-family: 'Consolas', monospace; font-size: 11.5px;"></span></div>
+            <div><b>🇵🇱 PL - Poland:</b> <span id="time-pl" style="font-family: 'Consolas', monospace; font-size: 11.5px;"></span></div>
         </div>
     </div>
 </div>
@@ -58,8 +58,8 @@ header_html = """
     updateTime();
 </script>
 """
-# Tăng chiều cao lên 85px để khung chứa hiển thị thoáng, không bị cắt dòng
-components.html(header_html, height=85)
+# Tăng chiều cao lên 100px để thoải mái không bao giờ bị cắt dòng
+components.html(header_html, height=100)
 
 # ==========================================
 # CÁC HÀM XỬ LÝ DỮ LIỆU
