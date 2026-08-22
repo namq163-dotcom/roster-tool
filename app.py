@@ -5,6 +5,7 @@ from datetime import datetime
 from io import BytesIO, StringIO
 from openpyxl import load_workbook
 
+# --- CÁC HÀM XỬ LÝ CHUNG ---
 def parse_date(date_str):
     if pd.isna(date_str) or not str(date_str).strip() or str(date_str).strip().lower() == 'nan':
         return ""
@@ -17,11 +18,11 @@ def parse_date(date_str):
     except:
         return date_str
 
-def process_roster_data(gd_file, template_file_path):
+# --- LOGIC XỬ LÝ RIÊNG CHO VIỆT NAM (VNAPIS) ---
+def process_roster_data_vn(gd_file, template_file_path):
     content = gd_file.getvalue()
     df_gd = None
     
-    # 1. Đọc file GD (Hỗ trợ Excel, HTML, Text)
     try:
         df_gd = pd.read_excel(BytesIO(content))
     except Exception:
@@ -32,25 +33,19 @@ def process_roster_data(gd_file, template_file_path):
             try:
                 html_content = content.decode(enc, errors='ignore')
                 dfs = pd.read_html(StringIO(html_content))
-                if len(dfs) > 0:
-                    df_gd = dfs[0]
-                    break
-            except:
-                continue
+                if len(dfs) > 0: df_gd = dfs[0]; break
+            except: continue
 
     if df_gd is None or len(df_gd) == 0:
         for sep in ['\t', ',', ';', '|']:
             try:
                 df_gd = pd.read_csv(BytesIO(content), sep=sep, encoding='latin1', on_bad_lines='skip')
-                if df_gd is not None and len(df_gd.columns) > 1:
-                    break
-            except:
-                continue
+                if df_gd is not None and len(df_gd.columns) > 1: break
+            except: continue
 
     if df_gd is None or len(df_gd) == 0:
         raise ValueError("Không thể đọc được dữ liệu trong file GD.")
 
-    # 2. Tìm bảng chứa danh sách tổ bay
     header_idx = None
     for idx, row in df_gd.iterrows():
         row_str = row.fillna("").astype(str).str.lower()
@@ -58,8 +53,7 @@ def process_roster_data(gd_file, template_file_path):
             header_idx = idx
             break
             
-    if header_idx is None:
-        raise ValueError("Không tìm thấy bảng danh sách tổ bay trong file GD.")
+    if header_idx is None: raise ValueError("Không tìm thấy bảng danh sách tổ bay trong file GD.")
         
     header_row = df_gd.iloc[header_idx].fillna("").astype(str).str.lower()
     col_name = next((i for i, v in enumerate(header_row) if 'name' in v), None)
@@ -70,19 +64,17 @@ def process_roster_data(gd_file, template_file_path):
     col_expiry = next((i for i, v in enumerate(header_row) if 'expiry' in v), None)
 
     crew_data = []
-    seen_passports = set() # Tránh trùng lặp (double) dữ liệu
+    seen_passports = set()
     
     for idx in range(header_idx + 1, len(df_gd)):
         row = df_gd.iloc[idx]
-        if 'declaration of health' in row.fillna("").astype(str).str.cat(sep=" ").lower():
-            break
+        if 'declaration of health' in row.fillna("").astype(str).str.cat(sep=" ").lower(): break
             
         name_val = str(row.iloc[col_name]).strip() if col_name is not None and pd.notna(row.iloc[col_name]) else 'nan'
         passport_val = str(row.iloc[col_passport]).strip() if col_passport is not None and pd.notna(row.iloc[col_passport]) else 'nan'
         
         if name_val.lower() != 'nan' and passport_val.lower() != 'nan' and name_val != '':
-            if passport_val in seen_passports:
-                continue # Bỏ qua nếu bị trùng số passport
+            if passport_val in seen_passports: continue
             seen_passports.add(passport_val)
             
             name_parts = name_val.split()
@@ -91,71 +83,103 @@ def process_roster_data(gd_file, template_file_path):
                 
             family_name = name_parts[0] if name_parts else ""
             given_name = " ".join(name_parts[1:]) if len(name_parts) > 1 else ""
-            
             nat = str(row.iloc[col_nat]).strip() if col_nat is not None and pd.notna(row.iloc[col_nat]) else ""
             if nat.upper() == 'VNM': nat = 'VN'
-            
             gender = str(row.iloc[col_gender]).strip() if col_gender is not None and pd.notna(row.iloc[col_gender]) else ""
-            dob = parse_date(row.iloc[col_dob]) if col_dob is not None else ""
-            expiry = parse_date(row.iloc[col_expiry]) if col_expiry is not None else ""
             
             crew_data.append([
-                family_name, 
-                None, 
-                given_name, 
-                gender, 
-                nat, 
-                dob, 
-                'P', 
-                passport_val, 
-                nat, 
-                expiry
+                family_name, None, given_name, gender, nat, 
+                parse_date(row.iloc[col_dob]) if col_dob is not None else "", 
+                'P', passport_val, nat, 
+                parse_date(row.iloc[col_expiry]) if col_expiry is not None else ""
             ])
 
-    if len(crew_data) == 0:
-        raise ValueError("Không trích xuất được dữ liệu tổ bay nào từ file GD.")
+    if len(crew_data) == 0: raise ValueError("Không trích xuất được dữ liệu tổ bay nào từ file GD.")
 
-    # 3. Ghi vào file Template (Giữ nguyên dòng 1-13 làm tiêu đề chuẩn, bắt đầu ghi từ dòng 14)
     output = BytesIO()
     book = load_workbook(template_file_path)
     sheet = book.active
     
-    # Xóa sạch các dòng cũ từ dòng 14 trở xuống (tránh bị dính dữ liệu mẫu cũ bị double)
     for row in sheet.iter_rows(min_row=14, max_row=sheet.max_row, min_col=1, max_col=10):
-        for cell in row:
-            cell.value = None
+        for cell in row: cell.value = None
 
-    # Điền dữ liệu mới bắt đầu từ dòng 14 chuẩn xác
-    start_row = 14 
-    for r_idx, row_data in enumerate(crew_data, start_row):
+    for r_idx, row_data in enumerate(crew_data, 14):
         for c_idx, value in enumerate(row_data, 1):
             sheet.cell(row=r_idx, column=c_idx, value=value)
             
     book.save(output)
-    
     df_preview = pd.DataFrame(crew_data, columns=['Họ', 'Tên đệm', 'Tên', 'Giới tính', 'Quốc tịch', 'Ngày sinh', 'Loại giấy tờ', 'Số giấy tờ', 'Nơi cấp', 'Ngày hết hạn'])
     return output.getvalue(), df_preview
 
-st.set_page_config(page_title="Roster Automation", page_icon="✈️")
-st.title("✈️ Roster Tool: Chuyển đổi file GD tự động")
-st.markdown("Công cụ tự động chuyển đổi file General Declaration (GD) sang mẫu VNAPIS của Dịch vụ công quốc gia.")
 
-TEMPLATE_PATH = "Template_VNAPIS.xlsx" 
+# ==========================================
+# CẤU HÌNH GIAO DIỆN STREAMLIT (UI)
+# ==========================================
+st.set_page_config(page_title="Global APIS Automation", page_icon="✈️", layout="wide")
+st.title("✈️ Hệ thống APIS Đa Quốc Gia")
+st.markdown("Công cụ tự động trích xuất General Declaration (GD) sang Form APIS chuẩn của nhiều quốc gia.")
 
-uploaded_gd = st.file_uploader("Tải lên file GD (.xls, .xlsx)", type=["xls", "xlsx", "txt", "csv"])
+# 1. Từ điển cấu hình các nước (Bản đồ các nước)
+COUNTRY_CONFIG = {
+    "🇻🇳 Việt Nam (VNAPIS)": {
+        "template": "Template_VNAPIS.xlsx",
+        "ready": True
+    },
+    "🇰🇿 Kazakhstan": {
+        "template": "Template_Kazakhstan.xlsx",
+        "ready": False
+    },
+    "🇰🇬 Kyrgyzstan": {
+        "template": "Template_Kyrgyzstan.xlsx",
+        "ready": False
+    },
+    "🇹🇯 Tajikistan": {
+        "template": "Template_Tajikistan.xlsx",
+        "ready": False
+    },
+    "🇷🇺 Russia (Nga)": {
+        "template": "Template_Russia.xlsx",
+        "ready": False
+    },
+    "🇵🇱 Poland (Ba Lan)": {
+        "template": "Template_Poland.xlsx",
+        "ready": False
+    }
+}
 
-if uploaded_gd is not None:
-    st.info("Đang xử lý dữ liệu...")
-    try:
-        excel_data, preview_data = process_roster_data(uploaded_gd, TEMPLATE_PATH)
-        st.success("✅ Đã xử lý dữ liệu thành công! Vui lòng kiểm tra bản xem trước bên dưới:")
-        st.dataframe(preview_data) 
-        
-        st.download_button(
-            label="⬇️ Tải file Dịch vụ công chuẩn mẫu (Excel)",
-            data=excel_data,
-            file_name="VNAPIS_Crew_Completed.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
-    except Exception as e:
-        st.error(f"❌ Có lỗi xảy ra trong quá trình đọc file: {e}")
+# 2. Khung lựa chọn quốc gia
+st.markdown("---")
+selected_country = st.selectbox(
+    "🌍 Vui lòng chọn Quốc gia đến để xuất APIS:",
+    list(COUNTRY_CONFIG.keys())
+)
+
+config = COUNTRY_CONFIG[selected_country]
+
+# 3. Phân luồng xử lý
+if config["ready"]:
+    uploaded_gd = st.file_uploader(f"Tải lên file GD (.xls, .xlsx) cho {selected_country.split(' ')[1]}", type=["xls", "xlsx", "txt", "csv"])
+    
+    if uploaded_gd is not None:
+        st.info(f"Đang xử lý dữ liệu cho {selected_country}...")
+        try:
+            # Hiện tại gán VN vào hàm xử lý, các nước khác sẽ có hàm riêng sau
+            if "Việt Nam" in selected_country:
+                excel_data, preview_data = process_roster_data_vn(uploaded_gd, config["template"])
+                
+            st.success(f"✅ Đã xử lý thành công form APIS cho {selected_country}!")
+            st.dataframe(preview_data) 
+            
+            # Tên file tải về tự động đổi theo tên quốc gia
+            download_name = f"APIS_Crew_{selected_country.split(' ')[1]}.xlsx"
+            st.download_button(
+                label=f"⬇️ Tải form Excel hoàn chỉnh",
+                data=excel_data,
+                file_name=download_name,
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
+        except Exception as e:
+            st.error(f"❌ Có lỗi xảy ra: {e}")
+else:
+    st.warning(f"🚧 Chức năng xuất APIS cho **{selected_country.split(' ', 1)[1]}** đang được xây dựng.")
+    st.info("💡 **Hướng dẫn cho Admin:**\n1. Chuẩn bị file Excel mẫu của quốc gia này.\n2. Tải file mẫu lên hệ thống.\n3. Cung cấp quy tắc điền (Cột nào điền Tên, Dòng nào bắt đầu...) để lập trình viên hoàn thiện logic.")
