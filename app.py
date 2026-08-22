@@ -17,24 +17,48 @@ def parse_date(date_str):
         return date_str
 
 def process_roster_data(gd_file, template_file_path):
-    # Đọc file GD linh hoạt (hỗ trợ cả Excel và file HTML định dạng .xls)
+    content = gd_file.getvalue()
     df_gd = None
-    try:
-        df_gd = pd.read_excel(gd_file)
-    except Exception:
-        try:
-            content = gd_file.getvalue()
-            # Thử giải mã bằng utf-8 hoặc latin1 nếu file HTML tiếng Việt
-            try:
-                html_content = content.decode('utf-8')
-            except:
-                html_content = content.decode('latin1', errors='ignore')
-            
-            dfs = pd.read_html(StringIO(html_content))
-            df_gd = dfs[0]
-        except Exception as e:
-            raise ValueError(f"Không thể đọc file GD. Chi tiết: {e}")
     
+    # Thử lần lượt các cách đọc file khác nhau để đảm bảo không bao giờ lỗi
+    # Cách 1: Đọc như file Excel chuẩn (.xlsx, .xls)
+    try:
+        df_gd = pd.read_excel(BytesIO(content))
+    except Exception:
+        pass
+        
+    # Cách 2: Đọc như file HTML (nếu là file web `.xls`)
+    if df_gd is None or len(df_gd) == 0:
+        try:
+            for enc in ['utf-8', 'latin1', 'cp1258', 'ascii']:
+                try:
+                    html_content = content.decode(enc, errors='ignore')
+                    dfs = pd.read_html(StringIO(html_content))
+                    if len(dfs) > 0:
+                        df_gd = dfs[0]
+                        break
+                except:
+                    continue
+        except Exception:
+            pass
+            
+    # Cách 3: Đọc như file dạng bảng phân cách (CSV/Tab/Text)
+    if df_gd is None or len(df_gd) == 0:
+        try:
+            for sep in [',', '\t', ';', '|']:
+                try:
+                    df_gd = pd.read_csv(BytesIO(content), sep=sep, encoding='latin1', on_bad_lines='skip')
+                    if df_gd is not None and len(df_gd.columns) > 1:
+                        break
+                except:
+                    continue
+        except Exception as e:
+            raise ValueError(f"Không thể đọc được cấu trúc file GD. Chi tiết lỗi: {e}")
+
+    if df_gd is None or len(df_gd) == 0:
+        raise ValueError("File GD trống hoặc không tìm thấy dữ liệu hợp lệ.")
+
+    # Tìm dòng tiêu đề chứa 'passport' và 'name'
     header_idx = None
     for idx, row in df_gd.iterrows():
         row_str = row.astype(str).str.lower()
@@ -43,7 +67,7 @@ def process_roster_data(gd_file, template_file_path):
             break
             
     if header_idx is None:
-        raise ValueError("Không tìm thấy bảng danh sách tổ bay trong file GD.")
+        raise ValueError("Không tìm thấy bảng danh sách tổ bay (thiếu cột Passport hoặc Name) trong file.")
         
     header_row = df_gd.iloc[header_idx].astype(str).str.lower()
     col_name = col_passport = col_dob = col_gender = col_nat = col_expiry = None
@@ -121,7 +145,7 @@ st.markdown("Công cụ tự động chuyển đổi file General Declaration (G
 
 TEMPLATE_PATH = "Template_VNAPIS.xlsx" 
 
-uploaded_gd = st.file_uploader("Tải lên file GD (.xls hoặc .xlsx)", type=["xls", "xlsx"])
+uploaded_gd = st.file_uploader("Tải lên file GD (.xls, .xlsx hoặc định dạng văn bản)", type=["xls", "xlsx", "txt", "csv"])
 
 if uploaded_gd is not None:
     st.info("Đang xử lý dữ liệu...")
