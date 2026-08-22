@@ -20,26 +20,28 @@ def get_image_base64(file_path):
             return base64.b64encode(image_file.read()).decode()
     return None
 
-logo_b64 = get_image_base64("logo.png")
+# Đã sửa thành logo.jpg
+logo_b64 = get_image_base64("logo.jpg")
 
 if logo_b64:
-    logo_html = f'<img src="data:image/png;base64,{logo_b64}" alt="Crystal Bay Airlines" style="height: 70px; object-fit: contain;">'
+    # Đã sửa data:image/jpeg
+    logo_html = f'<img src="data:image/jpeg;base64,{logo_b64}" alt="Crystal Bay Airlines" style="height: 75px; object-fit: contain;">'
 else:
-    logo_html = '<h1 style="margin: 0; color: #d4af37; font-size: 26px;">CRYSTAL BAY AIRLINES</h1>'
+    logo_html = '<h1 style="margin: 0; color: #0056b3; font-size: 26px;">CRYSTAL BAY AIRLINES</h1>'
 
-# KHỐI HTML/JS GIAO DIỆN HEADER (LOGO + ĐỒNG HỒ)
+# KHỐI HTML/JS GIAO DIỆN HEADER (Nền sáng để hợp với logo mới)
 header_html = f"""
-<div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background-color: #081324; border-radius: 10px; border: 1px solid #1a2a40; font-family: Arial, sans-serif; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+<div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background-color: #f8f9fa; border-radius: 10px; border: 1px solid #dee2e6; font-family: Arial, sans-serif; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
     <!-- Bên trái: Logo Hãng -->
     <div style="display: flex; align-items: center;">
         {logo_html}
-        <div style="margin-left: 15px; border-left: 2px solid #d4af37; padding-left: 15px;">
-            <span style="color: #d4af37; font-size: 14px; font-weight: bold; letter-spacing: 2px;">GLOBAL APIS CENTER</span>
+        <div style="margin-left: 15px; border-left: 2px solid #0056b3; padding-left: 15px;">
+            <span style="color: #0056b3; font-size: 14px; font-weight: bold; letter-spacing: 1.5px;">GLOBAL APIS CENTER</span>
         </div>
     </div>
     
     <!-- Bên phải: Bảng Đồng Hồ Các Nước (Thời gian thực) -->
-    <div style="display: flex; gap: 20px; font-size: 13px; color: #333; background: #ffffff; padding: 10px 15px; border-radius: 8px; box-shadow: inset 0 0 5px rgba(0,0,0,0.1); border: 1px solid #e0e0e0;">
+    <div style="display: flex; gap: 20px; font-size: 13px; color: #333; background: #ffffff; padding: 10px 15px; border-radius: 8px; box-shadow: inset 0 0 5px rgba(0,0,0,0.05); border: 1px solid #e0e0e0;">
         <div style="line-height: 1.6;">
             <div><b style="color: #d32f2f;">🇻🇳 VN (Local):</b> <span id="time-vn" style="font-family: monospace; font-size: 14px; font-weight: bold;"></span></div>
             <div><b style="color: #0056b3;">🌐 UTC:</b> <span id="time-utc" style="font-family: monospace; font-size: 14px; font-weight: bold;"></span></div>
