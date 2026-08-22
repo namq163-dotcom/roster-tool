@@ -8,7 +8,7 @@ from openpyxl import load_workbook
 # ==========================================
 # CẤU HÌNH GIAO DIỆN (CRYSTAL BAY AIRLINES)
 # ==========================================
-st.set_page_config(page_title="Crystal Bay Airlines - APIS", page_icon="✈️", layout="wide")
+st.set_page_config(page_title="Crystal Bay Airlines - APIS", page_icon="💎", layout="wide")
 
 st.markdown("""
 <style>
@@ -35,7 +35,7 @@ st.markdown("""
 header_html = """
 <div style="background: linear-gradient(135deg, #1a2a6c, #001f3f); padding: 20px; border-radius: 15px; color: white; font-family: sans-serif; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border-bottom: 4px solid #d4af37;">
     <div style="text-align: center; margin-bottom: 15px;">
-        <div style="font-size: 24px; font-weight: 900; letter-spacing: 2px; color: #d4af37;">CRYSTAL BAY AIRLINES</div>
+        <div style="font-size: 24px; font-weight: 900; letter-spacing: 2px; color: #d4af37;">💎CRYSTAL BAY AIRLINES</div>
         <div style="font-size: 14px; letter-spacing: 4px; opacity: 0.8;">APIS CENTER</div>
     </div>
     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; font-size: 13px; text-align: center;">
