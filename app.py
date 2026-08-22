@@ -11,10 +11,9 @@ from openpyxl import load_workbook
 # ==========================================
 st.set_page_config(page_title="Global APIS Automation", page_icon="✈️", layout="wide")
 
-# KHUNG HEADER: TẠO GIAO DIỆN CHUẨN OCC HÀNG KHÔNG
+# KHUNG HEADER: GIAO DIỆN CHUẨN OCC HÀNG KHÔNG
 header_html = """
 <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; background-color: #f4f6f9; border-radius: 8px; border: 1px solid #dcdfe6; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-    <!-- Bên trái: Logo nhận diện hãng -->
     <div style="display: flex; align-items: center;">
         <div style="background: linear-gradient(135deg, #004080, #002040); padding: 10px 14px; border-radius: 6px; margin-right: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.15);">
             <span style="font-size: 22px;">✈️</span>
@@ -25,7 +24,6 @@ header_html = """
         </div>
     </div>
     
-    <!-- Bên phải: Bảng Đồng Hồ Thời Gian Thực (Chuẩn OCC) -->
     <div style="display: flex; gap: 12px; font-size: 11.5px; color: #2c3e50; background: #ffffff; padding: 8px 14px; border-radius: 6px; border: 1px solid #dcdfe6; box-shadow: inset 0 1px 3px rgba(0,0,0,0.03);">
         <div style="line-height: 1.6;">
             <div><b style="color: #c0392b;">🇻🇳 VN (Local):</b> <span id="time-vn" style="font-family: 'Consolas', monospace; font-size: 12px; font-weight: 700;"></span></div>
@@ -58,8 +56,7 @@ header_html = """
     updateTime();
 </script>
 """
-# Tăng chiều cao lên 100px để thoải mái không bao giờ bị cắt dòng
-components.html(header_html, height=100)
+components.html(header_html, height=110)
 
 # ==========================================
 # CÁC HÀM XỬ LÝ DỮ LIỆU
@@ -149,38 +146,77 @@ def process_roster_data_vn(gd_file, template_file_path):
     return output.getvalue(), df_preview
 
 # ==========================================
-# PHẦN THÂN TRANG WEB (CHỨC NĂNG CHÍNH)
+# GIAO DIỆN CHỌN QUỐC GIA (DẠNG 6 Ô VUÔNG)
 # ==========================================
+st.markdown("<p style='font-size: 16px; font-weight: bold; color: #1f2937;'>🌍 Vui lòng chọn Quốc gia đến để xuất APIS:</p>", unsafe_allow_html=True)
+
 COUNTRY_CONFIG = {
-    "🇻🇳 Việt Nam (VNAPIS)": {"template": "Template_VNAPIS.xlsx", "ready": True},
-    "🇰🇿 Kazakhstan": {"template": "Template_Kazakhstan.xlsx", "ready": False},
-    "🇰🇬 Kyrgyzstan": {"template": "Template_Kyrgyzstan.xlsx", "ready": False},
-    "🇹🇯 Tajikistan": {"template": "Template_Tajikistan.xlsx", "ready": False},
-    "🇷🇺 Russia (Nga)": {"template": "Template_Russia.xlsx", "ready": False},
-    "🇵🇱 Poland (Ba Lan)": {"template": "Template_Poland.xlsx", "ready": False}
+    "Việt Nam (VNAPIS)": {"flag": "🇻🇳", "name": "Việt Nam", "code": "VNAPIS", "template": "Template_VNAPIS.xlsx", "ready": True},
+    "Kazakhstan": {"flag": "🇰🇿", "name": "Kazakhstan", "code": "KZ", "template": "Template_Kazakhstan.xlsx", "ready": False},
+    "Kyrgyzstan": {"flag": "🇰🇬", "name": "Kyrgyzstan", "code": "KG", "template": "Template_Kyrgyzstan.xlsx", "ready": False},
+    "Tajikistan": {"flag": "🇹🇯", "name": "Tajikistan", "code": "TJ", "template": "Template_Tajikistan.xlsx", "ready": False},
+    "Russia": {"flag": "🇷🇺", "name": "Russia (Nga)", "code": "RU", "template": "Template_Russia.xlsx", "ready": False},
+    "Poland": {"flag": "🇵🇱", "name": "Poland (Ba Lan)", "code": "PL", "template": "Template_Poland.xlsx", "ready": False}
 }
 
-selected_country = st.selectbox("🌍 Vui lòng chọn Quốc gia đến để xuất APIS:", list(COUNTRY_CONFIG.keys()))
+if 'selected_country' not in st.session_state:
+    st.session_state.selected_country = "Việt Nam (VNAPIS)"
+
+# Chia thành 2 hàng, mỗi hàng 3 ô vuông
+cols1 = st.columns(3)
+keys = list(COUNTRY_CONFIG.keys())
+
+for i in range(3):
+    c_key = keys[i]
+    cfg = COUNTRY_CONFIG[c_key]
+    with cols1[i]:
+        is_selected = (st.session_state.selected_country == c_key)
+        border_color = "#0056b3" if is_selected else "#e5e7eb"
+        bg_color = "#f0f7ff" if is_selected else "#ffffff"
+        
+        btn_label = f"{cfg['flag']} {cfg['name']}"
+        if st.button(btn_label, key=f"btn_{c_key}", use_container_width=True):
+            st.session_state.selected_country = c_key
+            st.rerun()
+
+cols2 = st.columns(3)
+for i in range(3, 6):
+    c_key = keys[i]
+    cfg = COUNTRY_CONFIG[c_key]
+    with cols2[i-3]:
+        is_selected = (st.session_state.selected_country == c_key)
+        border_color = "#0056b3" if is_selected else "#e5e7eb"
+        bg_color = "#f0f7ff" if is_selected else "#ffffff"
+        
+        btn_label = f"{cfg['flag']} {cfg['name']}"
+        if st.button(btn_label, key=f"btn_{c_key}", use_container_width=True):
+            st.session_state.selected_country = c_key
+            st.rerun()
+
+st.markdown("<div style='margin-bottom: 15px;'></div>", unsafe_allow_html=True)
+
+# Xử lý quốc gia được chọn
+selected_country = st.session_state.selected_country
 config = COUNTRY_CONFIG[selected_country]
 
 if config["ready"]:
-    uploaded_gd = st.file_uploader(f"Tải lên file GD (.xls, .xlsx) cho {selected_country.split(' ')[1]}", type=["xls", "xlsx", "txt", "csv"])
+    uploaded_gd = st.file_uploader(f"Tải lên file GD (.xls, .xlsx) cho {config['name']}", type=["xls", "xlsx", "txt", "csv"])
     if uploaded_gd is not None:
-        st.info(f"Đang xử lý dữ liệu cho {selected_country}...")
+        st.info(f"Đang xử lý dữ liệu cho {config['name']}...")
         try:
             if "Việt Nam" in selected_country:
                 excel_data, preview_data = process_roster_data_vn(uploaded_gd, config["template"])
                 
-            st.success(f"✅ Đã xử lý thành công form APIS cho {selected_country}!")
+            st.success(f"✅ Đã xử lý thành công form APIS cho {config['name']}!")
             st.dataframe(preview_data) 
             st.download_button(
                 label=f"⬇️ Tải form Excel hoàn chỉnh",
                 data=excel_data,
-                file_name=f"APIS_Crew_{selected_country.split(' ')[1]}.xlsx",
+                file_name=f"APIS_Crew_{config['code']}.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
         except Exception as e:
             st.error(f"❌ Có lỗi xảy ra: {e}")
 else:
-    st.warning(f"🚧 Chức năng xuất APIS cho **{selected_country.split(' ', 1)[1]}** đang được xây dựng.")
+    st.warning(f"🚧 Chức năng xuất APIS cho **{config['name']}** đang được xây dựng.")
     st.info("💡 **Hướng dẫn cho Admin:**\n1. Chuẩn bị file Excel mẫu của quốc gia này.\n2. Tải file mẫu lên hệ thống.\n3. Cung cấp quy tắc điền để lập trình viên hoàn thiện logic.")
