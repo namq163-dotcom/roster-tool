@@ -11,20 +11,35 @@ from openpyxl import load_workbook
 # ==========================================
 st.set_page_config(page_title="Global APIS Automation", page_icon="✈️", layout="wide")
 
+# CSS TUỲ CHỈNH ĐỂ GIAO DIỆN RỰC RỠ, BẮT MẮT VÀ CHUYÊN NGHIỆP HƠN
+st.markdown("""
+<style>
+    .stButton > button {
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    .stButton > button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+</style>
+""", unsafe_allow_html=True)
+
 # KHUNG HEADER: GIAO DIỆN CHUẨN OCC HÀNG KHÔNG
 header_html = """
-<div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; background-color: #f4f6f9; border-radius: 8px; border: 1px solid #dcdfe6; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+<div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 22px; background: linear-gradient(135deg, #f8f9fa, #e9ecef); border-radius: 10px; border: 1px solid #dcdfe6; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin-bottom: 20px; box-shadow: 0 3px 6px rgba(0,0,0,0.06);">
     <div style="display: flex; align-items: center;">
-        <div style="background: linear-gradient(135deg, #004080, #002040); padding: 10px 14px; border-radius: 6px; margin-right: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.15);">
+        <div style="background: linear-gradient(135deg, #0056b3, #00264d); padding: 10px 14px; border-radius: 8px; margin-right: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
             <span style="font-size: 22px;">✈️</span>
         </div>
         <div style="line-height: 1.3;">
-            <div style="color: #002040; font-size: 21px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase;">CRYSTAL BAY AIRLINES</div>
+            <div style="color: #00264d; font-size: 21px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase;">CRYSTAL BAY AIRLINES</div>
             <div style="color: #0056b3; font-size: 11px; font-weight: 700; letter-spacing: 2.5px; margin-top: 2px;">APIS OPERATIONS CENTER</div>
         </div>
     </div>
     
-    <div style="display: flex; gap: 12px; font-size: 11.5px; color: #2c3e50; background: #ffffff; padding: 8px 14px; border-radius: 6px; border: 1px solid #dcdfe6; box-shadow: inset 0 1px 3px rgba(0,0,0,0.03);">
+    <div style="display: flex; gap: 12px; font-size: 11.5px; color: #2c3e50; background: #ffffff; padding: 8px 14px; border-radius: 8px; border: 1px solid #dcdfe6; box-shadow: inset 0 1px 3px rgba(0,0,0,0.03);">
         <div style="line-height: 1.6;">
             <div><b style="color: #c0392b;">🇻🇳 VN (Local):</b> <span id="time-vn" style="font-family: 'Consolas', monospace; font-size: 12px; font-weight: 700;"></span></div>
             <div><b style="color: #2980b9;">🌐 UTC:</b> <span id="time-utc" style="font-family: 'Consolas', monospace; font-size: 12px; font-weight: 700;"></span></div>
@@ -146,52 +161,52 @@ def process_roster_data_vn(gd_file, template_file_path):
     return output.getvalue(), df_preview
 
 # ==========================================
-# GIAO DIỆN CHỌN QUỐC GIA (DẠNG 6 Ô VUÔNG)
+# GIAO DIỆN CHỌN QUỐC GIA (Ô VUÔNG & CỜ THẬT)
 # ==========================================
 st.markdown("<p style='font-size: 16px; font-weight: bold; color: #1f2937;'>🌍 Vui lòng chọn Quốc gia đến để xuất APIS:</p>", unsafe_allow_html=True)
 
 COUNTRY_CONFIG = {
-    "Việt Nam (VNAPIS)": {"flag": "🇻🇳", "name": "Việt Nam", "code": "VNAPIS", "template": "Template_VNAPIS.xlsx", "ready": True},
-    "Kazakhstan": {"flag": "🇰🇿", "name": "Kazakhstan", "code": "KZ", "template": "Template_Kazakhstan.xlsx", "ready": False},
-    "Kyrgyzstan": {"flag": "🇰🇬", "name": "Kyrgyzstan", "code": "KG", "template": "Template_Kyrgyzstan.xlsx", "ready": False},
-    "Tajikistan": {"flag": "🇹🇯", "name": "Tajikistan", "code": "TJ", "template": "Template_Tajikistan.xlsx", "ready": False},
-    "Russia": {"flag": "🇷🇺", "name": "Russia (Nga)", "code": "RU", "template": "Template_Russia.xlsx", "ready": False},
-    "Poland": {"flag": "🇵🇱", "name": "Poland (Ba Lan)", "code": "PL", "template": "Template_Poland.xlsx", "ready": False}
+    "Việt Nam (VNAPIS)": {"flag_url": "https://flagcdn.com/w80/vn.png", "name": "Việt Nam (VNAPIS)", "code": "VNAPIS", "template": "Template_VNAPIS.xlsx", "ready": True},
+    "Kazakhstan": {"flag_url": "https://flagcdn.com/w80/kz.png", "name": "Kazakhstan", "code": "KZ", "template": "Template_Kazakhstan.xlsx", "ready": False},
+    "Kyrgyzstan": {"flag_url": "https://flagcdn.com/w80/kg.png", "name": "Kyrgyzstan", "code": "KG", "template": "Template_Kyrgyzstan.xlsx", "ready": False},
+    "Tajikistan": {"flag_url": "https://flagcdn.com/w80/tj.png", "name": "Tajikistan", "code": "TJ", "template": "Template_Tajikistan.xlsx", "ready": False},
+    "Russia": {"flag_url": "https://flagcdn.com/w80/ru.png", "name": "Russia (Nga)", "code": "RU", "template": "Template_Russia.xlsx", "ready": False},
+    "Poland": {"flag_url": "https://flagcdn.com/w80/pl.png", "name": "Poland (Ba Lan)", "code": "PL", "template": "Template_Poland.xlsx", "ready": False}
 }
 
 if 'selected_country' not in st.session_state:
     st.session_state.selected_country = "Việt Nam (VNAPIS)"
 
-# Chia thành 2 hàng, mỗi hàng 3 ô vuông
-cols1 = st.columns(3)
 keys = list(COUNTRY_CONFIG.keys())
 
-for i in range(3):
-    c_key = keys[i]
-    cfg = COUNTRY_CONFIG[c_key]
-    with cols1[i]:
+# Hiển thị 6 ô vuông chọn quốc gia trực quan thành 2 hàng (mỗi hàng 3 ô)
+def render_country_grid(start_idx, end_idx):
+    cols = st.columns(3)
+    for i, idx in enumerate(range(start_idx, end_idx)):
+        c_key = keys[idx]
+        cfg = COUNTRY_CONFIG[c_key]
         is_selected = (st.session_state.selected_country == c_key)
-        border_color = "#0056b3" if is_selected else "#e5e7eb"
-        bg_color = "#f0f7ff" if is_selected else "#ffffff"
         
-        btn_label = f"{cfg['flag']} {cfg['name']}"
-        if st.button(btn_label, key=f"btn_{c_key}", use_container_width=True):
-            st.session_state.selected_country = c_key
-            st.rerun()
+        with cols[i]:
+            # Tạo card màu sắc nổi bật hơn
+            border_color = "#0056b3" if is_selected else "#d1d5db"
+            bg_color = "#e6f0fa" if is_selected else "#ffffff"
+            shadow = "0 4px 10px rgba(0,86,179,0.2)" if is_selected else "0 2px 4px rgba(0,0,0,0.05)"
+            
+            st.markdown(f"""
+            <div style="display: flex; align-items: center; padding: 10px 14px; background-color: {bg_color}; border: 2px solid {border_color}; border-radius: 10px; box-shadow: {shadow}; margin-bottom: 8px;">
+                <img src="{cfg['flag_url']}" width="38" style="border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.2); margin-right: 12px; object-fit: cover;">
+                <div style="font-weight: 700; color: #1f2937; font-size: 14px;">{cfg['name']}</div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            btn_text = f"👉 Chọn {cfg['name'].split(' ')[0]}" if not is_selected else "✅ Đang chọn"
+            if st.button(btn_text, key=f"btn_{c_key}", use_container_width=True):
+                st.session_state.selected_country = c_key
+                st.rerun()
 
-cols2 = st.columns(3)
-for i in range(3, 6):
-    c_key = keys[i]
-    cfg = COUNTRY_CONFIG[c_key]
-    with cols2[i-3]:
-        is_selected = (st.session_state.selected_country == c_key)
-        border_color = "#0056b3" if is_selected else "#e5e7eb"
-        bg_color = "#f0f7ff" if is_selected else "#ffffff"
-        
-        btn_label = f"{cfg['flag']} {cfg['name']}"
-        if st.button(btn_label, key=f"btn_{c_key}", use_container_width=True):
-            st.session_state.selected_country = c_key
-            st.rerun()
+render_country_grid(0, 3)
+render_country_grid(3, 6)
 
 st.markdown("<div style='margin-bottom: 15px;'></div>", unsafe_allow_html=True)
 
