@@ -9,7 +9,7 @@ from openpyxl import load_workbook
 # ==========================================
 # CẤU HÌNH GIAO DIỆN STREAMLIT (UI)
 # ==========================================
-st.set_page_config(page_title="Global APIS Automation", page_icon="✈️", layout="wide")
+st.set_page_config(page_title="APIS Crystal Bay Airlines", page_icon="✈️", layout="wide")
 
 # CSS TUỲ CHỈNH ĐỂ GIAO DIỆN RỰC RỠ, BẮT MẮT VÀ CHUYÊN NGHIỆP HƠN
 st.markdown("""
