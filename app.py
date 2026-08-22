@@ -11,34 +11,34 @@ from openpyxl import load_workbook
 # ==========================================
 st.set_page_config(page_title="Global APIS Automation", page_icon="✈️", layout="wide")
 
-# KHUNG HEADER: TẠO GIAO DIỆN LOGO & ĐỒNG HỒ THỜI GIAN THỰC BẰNG HTML/CSS
+# KHUNG HEADER: TẠO GIAO DIỆN CHUẨN OCC HÀNG KHÔNG
 header_html = """
-<div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; background-color: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6; font-family: Arial, sans-serif; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-    <!-- Bên trái: Logo thiết kế chuẩn hãng -->
+<div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; background-color: #f4f6f9; border-radius: 8px; border: 1px solid #dcdfe6; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+    <!-- Bên trái: Logo nhận diện hãng -->
     <div style="display: flex; align-items: center;">
-        <div style="background: linear-gradient(135deg, #0056b3, #003366); padding: 8px 12px; border-radius: 6px; margin-right: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-            <span style="font-size: 20px;">✈️</span>
+        <div style="background: linear-gradient(135deg, #004080, #002040); padding: 10px 14px; border-radius: 6px; margin-right: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.15);">
+            <span style="font-size: 22px;">✈️</span>
         </div>
-        <div style="line-height: 1.2;">
-            <div style="color: #003366; font-size: 20px; font-weight: 900; letter-spacing: 0.5px; text-transform: uppercase;">CRYSTAL BAY AIRLINES</div>
-            <div style="color: #666; font-size: 11px; font-weight: bold; letter-spacing: 2px; margin-top: 3px;">APIS CENTER</div>
+        <div style="line-height: 1.3;">
+            <div style="color: #002040; font-size: 21px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase;">CRYSTAL BAY AIRLINES</div>
+            <div style="color: #0056b3; font-size: 11px; font-weight: 700; letter-spacing: 2.5px; margin-top: 2px;">APIS OPERATIONS CENTER</div>
         </div>
     </div>
     
-    <!-- Bên phải: Bảng Đồng Hồ Các Nước (Thời gian thực) -->
-    <div style="display: flex; gap: 15px; font-size: 12px; color: #333; background: #ffffff; padding: 8px 15px; border-radius: 6px; border: 1px solid #e0e0e0;">
-        <div style="line-height: 1.4;">
-            <div><b style="color: #d32f2f;">🇻🇳 VN (Local):</b> <span id="time-vn" style="font-family: monospace; font-size: 12px; font-weight: bold;"></span></div>
-            <div><b style="color: #0056b3;">🌐 UTC:</b> <span id="time-utc" style="font-family: monospace; font-size: 12px; font-weight: bold;"></span></div>
+    <!-- Bên phải: Bảng Đồng Hồ Thời Gian Thực (Chuẩn OCC) -->
+    <div style="display: flex; gap: 15px; font-size: 12px; color: #2c3e50; background: #ffffff; padding: 10px 18px; border-radius: 6px; border: 1px solid #dcdfe6; box-shadow: inset 0 1px 3px rgba(0,0,0,0.03);">
+        <div style="line-height: 1.5;">
+            <div><b style="color: #c0392b;">🇻🇳 VN (Local):</b> <span id="time-vn" style="font-family: 'Consolas', monospace; font-size: 13px; font-weight: 700;"></span></div>
+            <div><b style="color: #2980b9;">🌐 UTC:</b> <span id="time-utc" style="font-family: 'Consolas', monospace; font-size: 13px; font-weight: 700;"></span></div>
         </div>
-        <div style="border-left: 1px solid #ccc; padding-left: 12px; line-height: 1.4;">
-            <div><b>🇰🇿 KZ:</b> <span id="time-kz" style="font-family: monospace; font-size: 12px;"></span></div>
-            <div><b>🇰🇬 KG:</b> <span id="time-kg" style="font-family: monospace; font-size: 12px;"></span></div>
-            <div><b>🇹🇯 TJ:</b> <span id="time-tj" style="font-family: monospace; font-size: 12px;"></span></div>
+        <div style="border-left: 1px solid #dcdfe6; padding-left: 14px; line-height: 1.5;">
+            <div><b>🇰🇿 KZ - Kazakhstan:</b> <span id="time-kz" style="font-family: 'Consolas', monospace; font-size: 12px;"></span></div>
+            <div><b>🇰🇬 KG - Kyrgyzstan:</b> <span id="time-kg" style="font-family: 'Consolas', monospace; font-size: 12px;"></span></div>
+            <div><b>🇹🇯 TJ - Tajikistan:</b> <span id="time-tj" style="font-family: 'Consolas', monospace; font-size: 12px;"></span></div>
         </div>
-        <div style="border-left: 1px solid #ccc; padding-left: 12px; line-height: 1.4;">
-            <div><b>🇷🇺 RU:</b> <span id="time-ru" style="font-family: monospace; font-size: 12px;"></span></div>
-            <div><b>🇵🇱 PL:</b> <span id="time-pl" style="font-family: monospace; font-size: 12px;"></span></div>
+        <div style="border-left: 1px solid #dcdfe6; padding-left: 14px; line-height: 1.5;">
+            <div><b>🇷🇺 RU - Russia:</b> <span id="time-ru" style="font-family: 'Consolas', monospace; font-size: 12px;"></span></div>
+            <div><b>🇵🇱 PL - Poland:</b> <span id="time-pl" style="font-family: 'Consolas', monospace; font-size: 12px;"></span></div>
         </div>
     </div>
 </div>
@@ -58,7 +58,8 @@ header_html = """
     updateTime();
 </script>
 """
-components.html(header_html, height=75)
+# Tăng chiều cao lên 85px để khung chứa hiển thị thoáng, không bị cắt dòng
+components.html(header_html, height=85)
 
 # ==========================================
 # CÁC HÀM XỬ LÝ DỮ LIỆU
