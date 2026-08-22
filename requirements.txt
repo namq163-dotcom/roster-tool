@@ -3,6 +3,7 @@ pandas
 numpy
 xlsxwriter
 openpyxl
+xlrd
 lxml
 html5lib
 beautifulsoup4
